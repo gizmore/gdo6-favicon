@@ -1,0 +1,3 @@
+[submodule "php-ico"]
+	path = php-ico
+	url = https://github.com/chrisbliss18/php-ico
