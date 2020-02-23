@@ -48,7 +48,7 @@ final class Module_Favicon extends GDO_Module
 	{
 		require_once $this->filePath('php-ico/class-php-ico.php');
 		$ico = new \PHP_ICO();
-		$ico->add_image('favicon.png');
+		$ico->add_image('favicon.png', [32, 32]);
 		$ico->save_ico('favicon.ico');
 	}
 	
