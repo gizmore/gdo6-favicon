@@ -5,6 +5,7 @@ use GDO\Core\GDO_Module;
 use GDO\File\GDT_ImageFile;
 use GDO\Core\Website;
 use GDO\File\GDO_File;
+use GDO\Core\GDT_Array;
 
 /**
  * Upload a 192x192.PNG which is the default on most browsers.
@@ -61,6 +62,11 @@ final class Module_Favicon extends GDO_Module
 			Website::addHead("<link rel=\"shortcut icon\" href=\"{$root}favicon.ico?v={$v}\" type=\"image/x-icon\" />");
 			Website::addHead("<link rel=\"icon\" type=\"image/png\" href=\"{$root}favicon.png?v={$v}\" />");
 		}
+	}
+	
+	public function hookIgnoreDocsFiles(GDT_Array $ignore)
+	{
+	    $ignore->data[] = 'GDO/Favicon/php-ico/**/*';
 	}
 	
 }
