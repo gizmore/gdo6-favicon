@@ -11,7 +11,8 @@ use GDO\Core\GDT_Array;
  * Upload a 192x192.PNG which is the default on most browsers.
  * Convert to ico as well.
  * @author gizmore
- * @version 6.10
+ * @version 6.10.2
+ * @since 6.9.0
  */
 final class Module_Favicon extends GDO_Module
 {
@@ -19,9 +20,9 @@ final class Module_Favicon extends GDO_Module
 	
 	public function getConfig()
 	{
-		return array(
+	    return [
 			GDT_ImageFile::make('favicon')->previewHREF(href('File', 'GetFile', '&file='))->minHeight(196)->maxHeight(196)->minWidth(196)->maxWidth(196),
-		);
+	    ];
 	}
 	
 	/**
@@ -37,12 +38,11 @@ final class Module_Favicon extends GDO_Module
 		}
 	}
 	
-	private function updateFavicon()
+	public function updateFavicon()
 	{
 		# Copy as PNG
 		copy($this->cfgFavicon()->getPath(), 'favicon.png');
 		$this->convertToIco();
-		
 	}
 	
 	private function convertToIco()
@@ -58,7 +58,7 @@ final class Module_Favicon extends GDO_Module
 		if ($image = $this->cfgFavicon())
 		{
 			$v = $image->getID();
-			$root = GWF_WEB_ROOT;
+			$root = GDO_WEB_ROOT;
 			Website::addHead("<link rel=\"shortcut icon\" href=\"{$root}favicon.ico?v={$v}\" type=\"image/x-icon\" />");
 			Website::addHead("<link rel=\"icon\" type=\"image/png\" href=\"{$root}favicon.png?v={$v}\" />");
 		}
