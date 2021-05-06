@@ -6,6 +6,7 @@ use GDO\File\GDT_ImageFile;
 use GDO\Core\Website;
 use GDO\File\GDO_File;
 use GDO\Core\GDT_Array;
+use GDO\Core\GDOError;
 
 /**
  * Upload a 192x192.PNG which is the default on most browsers.
@@ -41,15 +42,36 @@ final class Module_Favicon extends GDO_Module
 	public function updateFavicon()
 	{
 		# Copy as PNG
-		copy($this->cfgFavicon()->getPath(), 'favicon.png');
-		$this->convertToIco();
+		$file = $this->cfgFavicon();
+		if (!$file->isImageType())
+		{
+		    throw new GDOError('err_not_an_image', [$file->getPath(), $file->getType()]);
+		}
+		elseif (!$this->isIco($file))
+		{
+    		$this->convertToIco($file);
+		}
+		else
+		{
+		    copy($file->getPath(), 'favicon.ico');
+		}
 	}
 	
-	private function convertToIco()
+	public function isIco(GDO_File $file)
+	{
+	    switch ($file->getType())
+	    {
+	        case 'image/vnd.microsoft.icon':
+	            return true;
+	    }
+	    return false;
+	}
+	
+	private function convertToIco(GDO_File $file)
 	{
 		require_once $this->filePath('php-ico/class-php-ico.php');
 		$ico = new \PHP_ICO();
-		$ico->add_image('favicon.png', [32, 32]);
+		$ico->add_image($file->getPath(), [32, 32]);
 		$ico->save_ico('favicon.ico');
 	}
 	
