@@ -22,7 +22,7 @@ final class Module_Favicon extends GDO_Module
 	public function getConfig()
 	{
 	    return [
-			GDT_ImageFile::make('favicon')->previewHREF(href('File', 'GetFile', '&file='))->minHeight(196)->maxHeight(196)->minWidth(196)->maxWidth(196),
+			GDT_ImageFile::make('favicon')->previewHREF(href('File', 'GetFile', '&file={id}'))->minHeight(196)->maxHeight(196)->minWidth(196)->maxWidth(196),
 	    ];
 	}
 	
