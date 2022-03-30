@@ -12,6 +12,11 @@ use GDO\Form\GDT_Select;
  */
 final class Image extends Method
 {
+	public function getTitle()
+	{
+		return 'Favicon';
+	}
+	
 	public function gdoParameters()
 	{
 		$choices = ['favicon', 'appletouch'];
