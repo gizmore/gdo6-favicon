@@ -25,7 +25,7 @@ final class Image extends Method
 	{
 		$image = Module_Favicon::instance()->cfgFavicon();
 		$variant = $this->gdoParameterVar('variant');
-		return GetFile::make()->executeWithId($image->getID(), $variant);
+		return GetFile::make()->executeWithId($image->getID(), $variant, true);
 	}
 	
 }
