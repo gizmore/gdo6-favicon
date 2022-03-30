@@ -5,24 +5,41 @@ use GDO\Core\GDO_Module;
 use GDO\File\GDT_ImageFile;
 use GDO\Core\Website;
 use GDO\File\GDO_File;
+use GDO\UI\GDT_Image;
 use GDO\Core\GDT_Array;
 use GDO\Core\GDOError;
 
 /**
- * Upload a 192x192.PNG which is the default on most browsers.
- * Convert to ico as well.
+ * Upload a bigger image, which gets converted to various formats.
+ * Embed these favicons into the html header.
+ * Convert to favicon.ico as well, which is not referenced in the html.
+ * 
  * @author gizmore
- * @version 6.10.2
+ * @version 6.11.4
  * @since 6.9.0
  */
 final class Module_Favicon extends GDO_Module
 {
-	public function onLoadLanguage() { return $this->loadLanguage('lang/favicon'); }
+	const FAVICON_WIDTH = 48;
+	const FAVICON_HEIGHT = 48;
+	
+	const APPLE_TOUCH_WIDTH = 180;
+	const APPLE_TOUCH_HEIGHT = 180;
+	
+	public function onLoadLanguage()
+	{
+		return $this->loadLanguage('lang/favicon');
+	}
 	
 	public function getConfig()
 	{
 	    return [
-			GDT_ImageFile::make('favicon')->previewHREF(href('File', 'GetFile', '&file={id}'))->minHeight(196)->maxHeight(196)->minWidth(196)->maxWidth(196),
+			GDT_ImageFile::make('favicon')->
+	    		previewHREF(href('Favicon', 'Image', '&variant=favicon'))->
+	    		minWidth(16)->maxWidth(512)->
+	    		minHeight(16)->maxHeight(512)->
+		    	scaledVersion('favicon', self::FAVICON_WIDTH, self::FAVICON_HEIGHT, GDT_Image::PNG)->
+		    	scaledVersion('appletouch', self::APPLE_TOUCH_WIDTH, self::APPLE_TOUCH_HEIGHT, GDT_Image::PNG),
 	    ];
 	}
 	
@@ -31,6 +48,9 @@ final class Module_Favicon extends GDO_Module
 	 */
 	public function cfgFavicon() { return $this->getConfigValue('favicon'); }
 	
+	######################
+	### Convert to ICO ###
+	######################
 	public function hookModuleVarsChanged(GDO_Module $module)
 	{
 		if ($module === $this)
@@ -42,7 +62,10 @@ final class Module_Favicon extends GDO_Module
 	public function updateFavicon()
 	{
 		# Copy as PNG
-		$file = $this->cfgFavicon();
+		if (!($file = $this->cfgFavicon()))
+		{
+			throw new GDOError('err_file_not_found');
+		}
 		if (!$file->isImageType())
 		{
 		    throw new GDOError('err_not_an_image', [$file->getPath(), $file->getType()]);
@@ -71,18 +94,24 @@ final class Module_Favicon extends GDO_Module
 	{
 		require_once $this->filePath('php-ico/class-php-ico.php');
 		$ico = new \PHP_ICO();
-		$ico->add_image($file->getPath(), [32, 32]);
+		$ico->add_image($file->getPath(), [self::FAVICON_WIDTH, self::FAVICON_HEIGHT]);
 		$ico->save_ico('favicon.ico');
 	}
 	
+	###############
+	### Include ###
+	###############
 	public function onIncludeScripts()
 	{
 		if ($image = $this->cfgFavicon())
 		{
 			$v = $image->getID();
 			$root = GDO_WEB_ROOT;
+			$href = href('Favicon', 'Image');
 			Website::addHead("<link rel=\"shortcut icon\" href=\"{$root}favicon.ico?v={$v}\" type=\"image/x-icon\" />");
-			Website::addHead("<link rel=\"icon\" type=\"image/png\" href=\"{$root}favicon.png?v={$v}\" />");
+			Website::addHead(sprintf('<link rel="icon" type="image/png" href="%s', $href.'?variant=favicon&v='.$v));
+			Website::addHead(sprintf('<link rel="apple-touch-icon" href="%s">', $href.'?variant=appletouch&v='.$v));
+			Website::addHead(sprintf('<meta property="og:image" content="%s">/>', $href."=v={$v}"));
 		}
 	}
 	
